@@ -17,5 +17,5 @@ Route::get('/game', 'App\Http\Controllers\HomeController@index');
 
 Route::get('/newgame', 'App\Http\Controllers\HomeController@newGame');
 
-Route::post('/postscore', 'App\Http\Controllers\HomeController@postScore');
+Route::post('/checkgame', 'App\Http\Controllers\HomeController@checkGame');
 

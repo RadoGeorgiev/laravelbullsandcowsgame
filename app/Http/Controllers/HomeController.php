@@ -97,21 +97,73 @@ class HomeController extends Controller
 
     public function getTop10() {
         $json = json_decode(Storage::get('top10.json'));
+        if (!is_null($json)) {
+            $elementCount  = count($json);
 
-        usort($json, function($a, $b) {
-            if (isset($a->score) && isset($b->score)) {
-                return $b->score - $a->score;
-            } else {
-                return -1;
+            if (!empty($json)) {
+                usort($json, function($a, $b) {
+                    if (isset($a->score) && isset($b->score)) {
+                        return $b->score - $a->score;
+                    } else {
+                        return -1;
+                    }
+                });
             }
-        });
 
-        $json = json_encode($json); 
+            $json = json_encode($json);
+        } else {
+            $json = json_encode(['name'=> '...', 'tries'=> '...', 'score'=> '...']);
+        }
 
         return $json;
     }
 
-    public function postScore(Request $request) {
-        // store score and reload page
+    public function storeGame($name, $tries, $score) {
+        $gameEntry = ['name'=> $name, 'tries'=> $tries, 'score'=> $score];
+        $current_data = Storage::get('top10.json');
+        $array_data = json_decode($current_data, true);
+        $extra = $gameEntry;
+        $array_data[] = $extra;
+        $final_data = json_encode($array_data);
+
+        Storage::put('top10.json', $final_data);
+    }
+
+    public function checkGame(Request $request) {
+        $cows = 0;
+        $bulls = 0;
+        $name = $request->input('name');
+        $number = $request->input('number');
+        $guessNumber = $request->input('guessNumber');
+        $tries = $request->input('tries');
+        $score = $request->input('score');
+
+        $guessNumber = str_split($guessNumber);
+
+        foreach ($guessNumber as $key => $value) {
+            if (in_array($value, $number)) {
+                $bullIndx = array_search($value, $number);
+                if ($key == $bullIndx) {
+                    $bulls++;
+                } else {
+                    $cows++;
+                }
+            }
+        }
+
+        $check = '';
+        if ($bulls == 4) {
+            $check = 'win';
+            self::storeGame($name, $tries, $score);
+        } else {
+            $check = 'no';
+        }
+
+        $resp = array("result" => 0, "message" => "");
+        $resp['check'] = $check;
+        $resp['bulls'] = $bulls;
+        $resp['cows'] = $cows;
+
+        return response()->json($resp);
     }
 }
