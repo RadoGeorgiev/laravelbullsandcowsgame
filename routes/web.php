@@ -13,4 +13,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [HomeController::class, 'index']);
+Route::get('/game', 'App\Http\Controllers\HomeController@index');
+
+Route::get('/newgame', 'App\Http\Controllers\HomeController@newGame');
+
+Route::post('/postscore', 'App\Http\Controllers\HomeController@postScore');
+
